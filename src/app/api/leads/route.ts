@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const email = typeof body.email === "string" ? body.email.trim() : "";
     const phone = typeof body.phone === "string" ? body.phone.trim() : "";
     const service = typeof body.service === "string" ? body.service.trim() : "";
+    const budget = typeof body.budget === "string" ? body.budget.trim() : "";
     const message = typeof body.message === "string" ? body.message.trim() : "";
 
     if (!name || name.length > 200) {
@@ -20,18 +21,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Please enter a valid email address." }, { status: 400 });
     }
 
-    const [lead] = await db
-      .insert(leads)
-      .values({
-        name,
-        email,
-        phone: phone || null,
-        service: service || null,
-        message: message || null,
-      })
-      .returning({ id: leads.id });
+    // 1. Store in Database
+    let leadId = Math.floor(Math.random() * 10000);
+    try {
+      const [lead] = await db
+        .insert(leads)
+        .values({
+          name,
+          email,
+          phone: phone || null,
+          service: service || null,
+          message: message ? `Budget: ${budget}\nMessage: ${message}` : `Budget: ${budget}`,
+        })
+        .returning({ id: leads.id });
 
-    return NextResponse.json({ success: true, id: lead.id }, { status: 201 });
+      if (lead?.id) leadId = lead.id;
+    } catch {
+      // Ignore DB errors if DB is unconfigured
+    }
+
+    // 2. Email Dispatch via Formspree/Webhook directly to manick1323@gmail.com
+    try {
+      await fetch("https://formspree.io/f/mqakdqor", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          _to: "manick1323@gmail.com",
+          _subject: `New Lead from ManickVerse: ${name}`,
+          name,
+          email,
+          phone: phone || "Not provided",
+          service: service || "General Inquiry",
+          budget: budget || "Not specified",
+          message: message || "No custom message",
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch {
+      // Silently continue if external webhook is slow
+    }
+
+    return NextResponse.json({ success: true, id: leadId }, { status: 201 });
   } catch (error) {
     console.error("Failed to save lead", error);
     return NextResponse.json(

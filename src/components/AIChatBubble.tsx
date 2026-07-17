@@ -20,27 +20,19 @@ import {
   Copy,
   Check,
   TrendingUp,
-  Globe,
   MessageSquare,
-  ArrowRight,
-  Layers,
   Award,
-  Play,
-  CheckCircle2,
 } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
-// Types for dynamic mini-app cards
-type CardType =
-  | "cost_calculator"
-  | "hero_preview"
-  | "roi_calculator"
-  | "audit_report"
-  | "dominance_quiz"
-  | "booking_slot";
-
 interface ChatCard {
-  type: CardType;
+  type:
+    | "cost_calculator"
+    | "hero_preview"
+    | "roi_calculator"
+    | "audit_report"
+    | "dominance_quiz"
+    | "booking_slot";
   data: any;
 }
 
@@ -53,15 +45,6 @@ interface Message {
   cta?: { label: string; href: string };
 }
 
-const CATEGORY_TABS = [
-  { id: "all", label: "⚡ Master AI" },
-  { id: "calc", label: "🧮 Interactive Quote" },
-  { id: "preview", label: "🎨 Design Preview" },
-  { id: "roi", label: "📈 ROI Estimator" },
-  { id: "audit", label: "🔍 Site Audit" },
-  { id: "quiz", label: "📊 Dominance Quiz" },
-];
-
 export default function AIChatBubble({
   isOpen,
   setIsOpen,
@@ -72,46 +55,47 @@ export default function AIChatBubble({
   const [speechEnabled, setSpeechEnabled] = useState(false);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  // Cost Calculator Mini-App State inside AI
-  const [calcStep, setCalcStep] = useState(1);
+  // Cost Calculator State
   const [calcType, setCalcType] = useState("Corporate Business");
   const [calcScale, setCalcScale] = useState("5-8 Page Flagship");
-  const [calcAddons, setCalcAddons] = useState<string[]>(["Payment Gateway", "SEO Schema"]);
 
-  // ROI Mini-App State inside AI
+  // ROI Calculator State
   const [roiVisitors, setRoiVisitors] = useState(5000);
-  const [roiOrderValue, setRoiOrderValue] = useState(2000); // in ₹
+  const [roiOrderValue, setRoiOrderValue] = useState(2000);
 
-  // Hero Preview Generator State inside AI
+  // Design Preview State
   const [brandNameInput, setBrandNameInput] = useState("");
   const [generatedPreview, setGeneratedPreview] = useState<any | null>(null);
 
   // Quiz State
-  const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
+  const [quizAnswer, setQuizAnswer] = useState<string | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
       sender: "ai",
-      text: "👋 Welcome to ManickVerse Master AI Strategy Suite! I am your lead digital architect. Select an interactive module below or ask any custom question in English or Tamil/Tanglish!",
+      text: "👋 Welcome to ManickVerse AI Strategy Studio! How can I help launch or elevate your online business today?",
       options: [
-        { label: "🧮 Interactive Quote Calculator (₹ / $)", actionText: "Launch Interactive Quote Calculator" },
-        { label: "🎨 Generate Live Hero Design Preview", actionText: "Generate live hero preview for my brand" },
-        { label: "📈 Compute My Monthly Revenue Surge (ROI)", actionText: "Calculate projected ROI gain" },
-        { label: "🔍 Audit My Website & Competitor Check", actionText: "Perform AI website audit" },
-        { label: "📊 Take 30-Sec Digital Dominance Quiz", actionText: "Start Digital Dominance Quiz" },
+        { label: "🧮 Instant Quote Calculator (₹ / $)", actionText: "Show quote calculator" },
+        { label: "🎨 Live Hero Design Preview", actionText: "Generate hero preview" },
+        { label: "📈 Revenue Surge Estimator (ROI)", actionText: "Calculate ROI revenue gain" },
+        { label: "🔍 Free Website UX & Speed Audit", actionText: "Audit my website" },
+        { label: "📅 Book 15-Min Technical Strategy Call", actionText: "Book a strategy call" },
       ],
     },
   ]);
 
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("all");
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    try {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    } catch {
+      // ignore
+    }
   };
 
   useEffect(() => {
@@ -120,6 +104,7 @@ export default function AIChatBubble({
     }
   }, [messages, isOpen, isTyping]);
 
+  // Safe Speech Synthesis
   const speakText = (text: string) => {
     if (!speechEnabled || typeof window === "undefined" || !("speechSynthesis" in window)) return;
     try {
@@ -129,14 +114,15 @@ export default function AIChatBubble({
       utterance.rate = 1.0;
       window.speechSynthesis.speak(utterance);
     } catch {
-      // ignore
+      // safe fallback
     }
   };
 
+  // Safe Microphone Input
   const handleVoiceInput = () => {
     soundManager.playClick();
-    if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-      alert("Voice input is not supported in this browser. Please type your query.");
+    if (typeof window === "undefined" || !("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+      alert("Voice input is not supported in this browser. Please type your message.");
       return;
     }
 
@@ -151,8 +137,10 @@ export default function AIChatBubble({
       recognition.start();
 
       recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript;
-        setInputValue(transcript);
+        if (event.results && event.results[0] && event.results[0][0]) {
+          const transcript = event.results[0][0].transcript;
+          setInputValue(transcript);
+        }
         setIsListening(false);
       };
 
@@ -163,10 +151,10 @@ export default function AIChatBubble({
     }
   };
 
-  // Advanced AI Response Router for Custom Questions, Tanglish, and Tools
-  const generateAIResponse = (userText: string) => {
+  // Process User Input & Respond
+  const processQuery = (userText: string) => {
     setIsTyping(true);
-    const query = userText.toLowerCase();
+    const query = userText.trim().toLowerCase();
 
     setTimeout(() => {
       let replyText = "";
@@ -174,7 +162,7 @@ export default function AIChatBubble({
       let cta: { label: string; href: string } | undefined;
       let card: ChatCard | undefined;
 
-      // 1. COST CALCULATOR MODULE
+      // Intent 1: Quote / Cost / Price / Calculator
       if (
         query.includes("calc") ||
         query.includes("quote") ||
@@ -182,21 +170,20 @@ export default function AIChatBubble({
         query.includes("price") ||
         query.includes("rupee") ||
         query.includes("dollar") ||
-        query.includes("package")
+        query.includes("package") ||
+        query.includes("how much")
       ) {
-        replyText = "🧮 Interactive Scope & Cost Matrix loaded:";
+        replyText = "🧮 Interactive Investment & Scope Calculator loaded:";
         card = {
           type: "cost_calculator",
-          data: {
-            title: "Custom Investment & Scope Calculator",
-          },
+          data: { title: "Custom Scope & Investment Matrix" },
         };
         options = [
-          { label: "🎨 Generate Visual Design Preview", actionText: "Generate live hero preview for my brand" },
+          { label: "🎨 Generate Design Preview", actionText: "Generate hero preview" },
           { label: "📱 WhatsApp Founder Direct", actionText: "Chat on WhatsApp" },
         ];
       }
-      // 2. DESIGN PREVIEW MODULE
+      // Intent 2: Design Preview / Wireframe / Hero
       else if (
         query.includes("preview") ||
         query.includes("design") ||
@@ -204,19 +191,17 @@ export default function AIChatBubble({
         query.includes("mockup") ||
         query.includes("look")
       ) {
-        replyText = "🎨 Instant Visual Wireframe Generator loaded. Type your brand name below or click sample:";
+        replyText = "🎨 Instant Visual Design Generator initialized. Type your brand name or click below:";
         card = {
           type: "hero_preview",
-          data: {
-            sampleBrands: ["Saffron & Sage", "Lumen Apparel", "Meridian Estates", "Aura AI"],
-          },
+          data: {},
         };
         options = [
-          { label: "💰 Calculate Cost For This Design", actionText: "Launch Interactive Quote Calculator" },
-          { label: "📅 Reserve 14-Day Sprint Slot", actionText: "Book a strategy call" },
+          { label: "💰 Calculate Cost For This Design", actionText: "Show quote calculator" },
+          { label: "📅 Reserve 14-Day Sprint", actionText: "Book a strategy call" },
         ];
       }
-      // 3. ROI GAIN ESTIMATOR
+      // Intent 3: ROI / Revenue / Growth
       else if (
         query.includes("roi") ||
         query.includes("revenue") ||
@@ -224,19 +209,17 @@ export default function AIChatBubble({
         query.includes("surge") ||
         query.includes("profit")
       ) {
-        replyText = "📈 Interactive Revenue & ROI Surge Calculator:";
+        replyText = "📈 Interactive Monthly Revenue Surge Estimator:";
         card = {
           type: "roi_calculator",
-          data: {
-            title: "Projected Monthly Growth Analysis",
-          },
+          data: {},
         };
         options = [
-          { label: "🚀 Claim This Revenue Growth in 14 Days", actionText: "Launch Interactive Quote Calculator" },
-          { label: "💬 Discuss Conversion Strategy on WhatsApp", actionText: "Chat on WhatsApp" },
+          { label: "🚀 Start 14-Day Build Sprint", actionText: "Show quote calculator" },
+          { label: "💬 Connect on WhatsApp", actionText: "Chat on WhatsApp" },
         ];
       }
-      // 4. WEBSITE DIAGNOSTIC AUDIT
+      // Intent 4: Website Audit / Health Check / URL
       else if (
         query.includes("audit") ||
         query.includes("review") ||
@@ -246,50 +229,47 @@ export default function AIChatBubble({
         query.includes("http") ||
         query.includes("site")
       ) {
-        replyText = "🔍 AI Diagnostic Performance & Competitor Benchmark Completed:";
+        replyText = "🔍 AI Diagnostic Performance & Core Web Vitals Benchmark Completed:";
         card = {
           type: "audit_report",
           data: {
             title: "Core Web Vitals & Conversion Audit",
-            currentSpeed: "38 / 100 Legacy Benchmark",
+            currentSpeed: "38 / 100 Speed Score",
             targetSpeed: "100 / 100 ManickVerse Standard",
             bottlenecks: [
-              "Delayed LCP First Paint (>3.8s)",
-              "Cumulative Layout Shift (CLS) on mobile",
+              "Mobile LCP response delayed (>3.8s)",
+              "Unoptimized image layout shifts",
               "Missing JSON-LD structured schema",
-              "Low CTA button contrast & placement",
+              "Low conversion CTA contrast",
             ],
           },
         };
         options = [
           { label: "✨ See Before vs After Redesigns", actionText: "Show case studies" },
-          { label: "📅 Book Audit Walkthrough Call", actionText: "Book a strategy call" },
+          { label: "📅 Book Audit Call", actionText: "Book a strategy call" },
         ];
       }
-      // 5. DIGITAL DOMINANCE QUIZ
+      // Intent 5: Quiz / Scorecard
       else if (
         query.includes("quiz") ||
         query.includes("scorecard") ||
         query.includes("test") ||
         query.includes("dominance")
       ) {
-        replyText = "📊 30-Second Digital Dominance Diagnostic Quiz:";
+        replyText = "📊 30-Second Digital Dominance Quiz:";
         card = {
           type: "dominance_quiz",
-          data: {
-            title: "Digital Dominance Scorecard",
-          },
+          data: {},
         };
       }
-      // 6. STRATEGY CALL BOOKING
+      // Intent 6: Book Meeting / Call / Schedule
       else if (
         query.includes("book") ||
         query.includes("call") ||
         query.includes("schedule") ||
-        query.includes("sprint") ||
         query.includes("meet")
       ) {
-        replyText = "📅 Reserve a 15-Min Technical Strategy Session with Our Founding Leads:";
+        replyText = "📅 Select a 15-Minute Strategy Slot with Our Founding Leads:";
         card = {
           type: "booking_slot",
           data: {
@@ -302,11 +282,11 @@ export default function AIChatBubble({
           },
         };
         cta = {
-          label: "Direct WhatsApp Line (+91 9361099051)",
+          label: "WhatsApp Direct Line (+91 9361099051)",
           href: "https://wa.me/919361099051?text=Hi%20ManickVerse%2C%20I%20want%20to%20reserve%20a%20strategy%20call.",
         };
       }
-      // 7. TANGLISH / TAMIL & CUSTOM INTELLIGENT RESPONSES
+      // Intent 7: Tamil / Tanglish Intention
       else if (
         query.includes("bro") ||
         query.includes("enna") ||
@@ -317,21 +297,21 @@ export default function AIChatBubble({
         query.includes("tamil")
       ) {
         replyText =
-          "Vanakkam bro! 👋 ManickVerse-la namma 2 weeks (14 days)-kulleyae full-a custom high-converting Next.js website design panni live panni tharovom.\n\n• Fixed Scope & On-Time Guarantee 🚀\n• 100/100 Core Web Vitals Speed Score ⚡\n• Custom Design in Framer/Figma 🎨\n\nUngalluku enna type website venum bro? Quotes check panna keezhe irukura button-ai click pannunga!";
+          "Vanakkam bro! 👋 ManickVerse-la namma 2 weeks (14 days)-kulleyae full custom high-converting website build panni live panni tharovom.\n\n• On-Time 14-Day Delivery 🚀\n• 100/100 Core Web Vitals Speed Score ⚡\n• Custom Design System 🎨\n\nQuotes check panna keezhe irukura buttons-ai click pannunga bro!";
         options = [
-          { label: "💰 Estimate Quote (₹ Rupees)", actionText: "Launch Interactive Quote Calculator" },
-          { label: "📱 WhatsApp Direct Chat", actionText: "Chat on WhatsApp" },
+          { label: "🧮 Check Quote (₹ Rupees)", actionText: "Show quote calculator" },
+          { label: "📱 WhatsApp Founder Direct", actionText: "Chat on WhatsApp" },
         ];
       }
-      // 8. GENERAL CUSTOM INTENT
+      // Intent 8: Greetings / General
       else {
         replyText =
-          `At ManickVerse, we engineer high-converting digital flagships in 14 days with 100/100 speed and Apple-inspired craftsmanship. How can we elevate your project?`;
+          "Hello! At ManickVerse, we build high-converting Next.js websites delivered in 14 days with 100/100 speed and custom Apple-tier design. How can we help your business today?";
         options = [
-          { label: "🧮 Custom Quote Calculator (₹ / $)", actionText: "Launch Interactive Quote Calculator" },
-          { label: "🎨 Visual Hero Preview Generator", actionText: "Generate live hero preview for my brand" },
-          { label: "📈 ROI & Revenue Lift Calculator", actionText: "Calculate projected ROI gain" },
-          { label: "📱 Direct Founder Line (+91 9361099051)", actionText: "Chat on WhatsApp" },
+          { label: "🧮 Interactive Quote Calculator", actionText: "Show quote calculator" },
+          { label: "🎨 Generate Design Preview", actionText: "Generate hero preview" },
+          { label: "📈 Calculate Projected ROI", actionText: "Calculate ROI revenue gain" },
+          { label: "📱 WhatsApp Founder Direct", actionText: "Chat on WhatsApp" },
         ];
       }
 
@@ -349,7 +329,7 @@ export default function AIChatBubble({
       setIsTyping(false);
       soundManager.playSuccess();
       speakText(replyText);
-    }, 600);
+    }, 400);
   };
 
   const handleSendMessage = (textToSend?: string) => {
@@ -365,10 +345,10 @@ export default function AIChatBubble({
 
     setMessages((prev) => [...prev, userMsg]);
     if (!textToSend) setInputValue("");
-    generateAIResponse(text);
+    processQuery(text);
   };
 
-  // Helper calculation for Cost Calculator
+  // Calculate Price helper
   const getCalculatedPrice = () => {
     let baseINR = 49999;
     let baseUSD = 1490;
@@ -384,9 +364,6 @@ export default function AIChatBubble({
     if (calcType === "E-Commerce Storefront") {
       baseINR += 20000;
       baseUSD += 500;
-    } else if (calcType === "SaaS Application") {
-      baseINR += 30000;
-      baseUSD += 800;
     }
 
     return { baseINR: `₹${baseINR.toLocaleString()}`, baseUSD: `$${baseUSD.toLocaleString()}` };
@@ -401,10 +378,10 @@ export default function AIChatBubble({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.85, y: 20 }}
             transition={{ type: "spring", damping: 22, stiffness: 260 }}
-            className="mb-3 flex flex-col h-[560px] max-h-[84vh] w-[calc(100vw-2rem)] sm:w-[430px] overflow-hidden rounded-3xl border border-white/20 bg-[#050818]/95 shadow-[0_25px_80px_rgba(0,0,0,0.95)] backdrop-blur-2xl"
+            className="mb-3 flex flex-col h-[540px] max-h-[84vh] w-[calc(100vw-2rem)] sm:w-[420px] overflow-hidden rounded-3xl border border-white/20 bg-[#050818]/95 shadow-[0_25px_80px_rgba(0,0,0,0.95)] backdrop-blur-2xl"
           >
-            {/* Neural Header */}
-            <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-electric/30 via-royal/20 to-cyan/20 p-3.5 sm:p-4">
+            {/* AI Header */}
+            <div className="flex items-center justify-between border-b border-white/10 bg-gradient-to-r from-electric/30 via-royal/20 to-cyan/20 p-3.5 sm:p-4 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-tr from-electric via-royal to-cyan p-0.5 shadow-md shrink-0">
                   <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-[#070b22]">
@@ -413,17 +390,17 @@ export default function AIChatBubble({
                   <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-[#050818] bg-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-white text-xs sm:text-sm flex items-center gap-1">
-                    ManickVerse AI Strategist v3.0
+                  <h3 className="font-display font-black text-white text-xs sm:text-sm">
+                    ManickVerse AI Strategist
                   </h3>
                   <p className="text-[10px] font-mono text-cyan-light flex items-center gap-1">
-                    <Flame className="h-3 w-3 text-amber-400" /> Neural Architecture Active
+                    <Flame className="h-3 w-3 text-amber-400" /> Active • 14-Day Delivery
                   </p>
                 </div>
               </div>
 
               <div className="flex items-center gap-1.5">
-                {/* Speech Output Toggle */}
+                {/* Speech Toggle */}
                 <button
                   onClick={() => {
                     soundManager.playClick();
@@ -434,7 +411,7 @@ export default function AIChatBubble({
                       ? "border-cyan-light/50 bg-cyan/20 text-cyan-light"
                       : "border-white/10 bg-white/5 text-white/50 hover:text-white"
                   }`}
-                  title={speechEnabled ? "Speech Voice ON" : "Speech Voice OFF"}
+                  title={speechEnabled ? "Voice Output ON" : "Voice Output OFF"}
                   aria-label="Toggle AI Voice Output"
                 >
                   {speechEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
@@ -443,40 +420,43 @@ export default function AIChatBubble({
                 <button
                   onClick={() => setIsOpen(false)}
                   className="rounded-xl p-1.5 text-white/60 hover:bg-white/10 hover:text-white transition-colors"
-                  aria-label="Close AI Engine"
+                  aria-label="Close Chat"
                 >
                   <X className="h-5 w-5" />
                 </button>
               </div>
             </div>
 
-            {/* Capability Tabs */}
-            <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/40 p-2 text-[10px] sm:text-[11px] scrollbar-none">
-              {CATEGORY_TABS.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    soundManager.playClick();
-                    setActiveCategory(tab.id);
-                    if (tab.id === "calc") handleSendMessage("Launch Interactive Quote Calculator");
-                    else if (tab.id === "preview") handleSendMessage("Generate live hero preview for my brand");
-                    else if (tab.id === "roi") handleSendMessage("Calculate projected ROI gain");
-                    else if (tab.id === "audit") handleSendMessage("Perform AI website audit");
-                    else if (tab.id === "quiz") handleSendMessage("Start Digital Dominance Quiz");
-                  }}
-                  className={`rounded-full px-2.5 py-1 font-bold whitespace-nowrap transition-all ${
-                    activeCategory === tab.id
-                      ? "bg-gradient-to-r from-electric to-royal text-white border border-cyan-light/40 shadow-sm"
-                      : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+            {/* Quick Feature Action Bar */}
+            <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-black/40 p-2 text-[10px] sm:text-[11px] scrollbar-none shrink-0">
+              <button
+                onClick={() => handleSendMessage("Show quote calculator")}
+                className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 font-semibold text-white/80 hover:bg-white/10 hover:text-white whitespace-nowrap"
+              >
+                🧮 Quote Calculator
+              </button>
+              <button
+                onClick={() => handleSendMessage("Generate hero preview")}
+                className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 font-semibold text-white/80 hover:bg-white/10 hover:text-white whitespace-nowrap"
+              >
+                🎨 Design Preview
+              </button>
+              <button
+                onClick={() => handleSendMessage("Calculate ROI revenue gain")}
+                className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 font-semibold text-white/80 hover:bg-white/10 hover:text-white whitespace-nowrap"
+              >
+                📈 ROI Surge
+              </button>
+              <button
+                onClick={() => handleSendMessage("Audit my website")}
+                className="rounded-full bg-white/5 border border-white/10 px-2.5 py-1 font-semibold text-white/80 hover:bg-white/10 hover:text-white whitespace-nowrap"
+              >
+                🔍 Site Audit
+              </button>
             </div>
 
-            {/* Chat Body */}
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3.5 text-xs scrollbar-none">
+            {/* Messages Scroll Area */}
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 text-xs scrollbar-none">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -493,21 +473,18 @@ export default function AIChatBubble({
                   >
                     <p className="whitespace-pre-line">{msg.text}</p>
 
-                    {/* MINI-APP 1: Interactive Cost & Scope Calculator */}
+                    {/* CARD 1: Interactive Cost Calculator */}
                     {msg.card && msg.card.type === "cost_calculator" && (
                       <div className="mt-3 rounded-xl border border-cyan/40 bg-[#080d2a] p-3 text-xs text-white shadow-lg">
                         <div className="font-bold text-cyan-light font-mono flex items-center justify-between mb-2">
                           <span className="flex items-center gap-1.5">
-                            <Calculator className="h-4 w-4" /> {msg.card.data.title}
-                          </span>
-                          <span className="text-[9px] bg-cyan/20 px-2 py-0.5 rounded font-bold text-cyan-light">
-                            14-Day Delivery
+                            <Calculator className="h-4 w-4" /> Scope & Investment Matrix
                           </span>
                         </div>
 
-                        {/* Step 1: Type */}
+                        {/* Selection 1 */}
                         <div className="mb-2">
-                          <span className="block text-[10px] text-white/50 mb-1 font-mono">Select Site Type:</span>
+                          <span className="block text-[10px] text-white/50 mb-1 font-mono">Industry / Type:</span>
                           <div className="flex flex-wrap gap-1">
                             {["Corporate Business", "E-Commerce Storefront", "Restaurant / Dining", "Personal Brand"].map((t) => (
                               <button
@@ -528,9 +505,9 @@ export default function AIChatBubble({
                           </div>
                         </div>
 
-                        {/* Step 2: Scale */}
+                        {/* Selection 2 */}
                         <div className="mb-3">
-                          <span className="block text-[10px] text-white/50 mb-1 font-mono">Select Scope Scale:</span>
+                          <span className="block text-[10px] text-white/50 mb-1 font-mono">Scope Scale:</span>
                           <div className="grid grid-cols-2 gap-1 text-[10px]">
                             {["1-Page High-Conv MVP", "5-8 Page Flagship", "10+ Page Enterprise"].map((s) => (
                               <button
@@ -551,16 +528,16 @@ export default function AIChatBubble({
                           </div>
                         </div>
 
-                        {/* Calculation Summary Box */}
+                        {/* Price Output & WhatsApp Relay */}
                         <div className="bg-black/50 p-2.5 rounded-xl border border-white/10 flex items-center justify-between">
                           <div>
-                            <span className="block text-[9px] text-white/50 font-mono">Calculated Investment:</span>
+                            <span className="block text-[9px] text-white/50 font-mono">Calculated Price:</span>
                             <span className="text-sm font-extrabold text-emerald-400">
                               {getCalculatedPrice().baseINR} <span className="text-[10px] text-white/50 font-normal">({getCalculatedPrice().baseUSD})</span>
                             </span>
                           </div>
                           <a
-                            href={`https://wa.me/919361099051?text=Hi%20ManickVerse%2C%20I%20calculated%20a%20quote%3A%20${encodeURIComponent(calcType)}%20(${encodeURIComponent(calcScale)})%20for%20${getCalculatedPrice().baseINR}.`}
+                            href={`https://wa.me/919361099051?text=Hi%20ManickVerse%2C%20I%20want%20to%20start%20a%20project%3A%20${encodeURIComponent(calcType)}%20(${encodeURIComponent(calcScale)})%20for%20${getCalculatedPrice().baseINR}.`}
                             target="_blank"
                             rel="noreferrer"
                             className="inline-flex items-center gap-1 rounded-lg bg-[#25D366] px-3 py-1.5 text-[10px] font-bold text-space-black shadow"
@@ -571,11 +548,11 @@ export default function AIChatBubble({
                       </div>
                     )}
 
-                    {/* MINI-APP 2: Hero Wireframe & Design Preview Generator */}
+                    {/* CARD 2: Live Design Preview */}
                     {msg.card && msg.card.type === "hero_preview" && (
                       <div className="mt-3 rounded-xl border border-purple-500/40 bg-[#0a0824] p-3 text-xs text-white shadow-lg">
                         <div className="font-bold text-purple-300 font-mono flex items-center gap-1.5 mb-2">
-                          <Feather className="h-4 w-4" /> Live Visual Design Preview
+                          <Feather className="h-4 w-4" /> Live Wireframe Generator
                         </div>
 
                         <div className="flex gap-1.5 mb-2">
@@ -583,7 +560,7 @@ export default function AIChatBubble({
                             type="text"
                             value={brandNameInput}
                             onChange={(e) => setBrandNameInput(e.target.value)}
-                            placeholder="Type brand name (e.g. Aura Coffee)..."
+                            placeholder="Type brand name (e.g. Saffron Coffee)..."
                             className="w-full rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] text-white outline-none focus:border-purple-400"
                           />
                           <button
@@ -593,7 +570,7 @@ export default function AIChatBubble({
                               setGeneratedPreview({
                                 name,
                                 headline: `Redefining Luxury & Performance for ${name}`,
-                                tag: "Awwwards Standard • 14 Days",
+                                tag: "Apple Standard • 14 Days",
                               });
                             }}
                             className="rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 px-3 py-1 text-[10px] font-bold text-white shrink-0"
@@ -617,15 +594,12 @@ export default function AIChatBubble({
                             <p className="mt-1 text-[10px] text-white/70">
                               Next.js 16 Glassmorphism • Sub-Second Speed Guarantee
                             </p>
-                            <button className="mt-2.5 rounded-full bg-gradient-to-r from-electric to-royal px-4 py-1 text-[10px] font-bold text-white">
-                              Request Full Figma/Framer Scope
-                            </button>
                           </motion.div>
                         )}
                       </div>
                     )}
 
-                    {/* MINI-APP 3: ROI Revenue Surge Estimator */}
+                    {/* CARD 3: ROI Surge Estimator */}
                     {msg.card && msg.card.type === "roi_calculator" && (
                       <div className="mt-3 rounded-xl border border-emerald-500/40 bg-[#051512] p-3 text-xs text-white shadow-lg">
                         <div className="font-bold text-emerald-400 font-mono flex items-center gap-1.5 mb-2">
@@ -667,7 +641,7 @@ export default function AIChatBubble({
                         </div>
 
                         <div className="bg-black/60 p-2.5 rounded-xl border border-emerald-500/30 text-center">
-                          <span className="block text-[9px] text-white/50 uppercase font-mono">Projected Net Monthly Revenue Gain</span>
+                          <span className="block text-[9px] text-white/50 uppercase font-mono">Net Projected Monthly Growth</span>
                           <span className="font-display font-black text-lg text-emerald-400">
                             +₹{Math.round(roiVisitors * 0.018 * roiOrderValue).toLocaleString()} / Month
                           </span>
@@ -675,13 +649,11 @@ export default function AIChatBubble({
                       </div>
                     )}
 
-                    {/* MINI-APP 4: Audit & Diagnostic Report */}
+                    {/* CARD 4: Site Audit Report */}
                     {msg.card && msg.card.type === "audit_report" && (
                       <div className="mt-3 rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-white">
-                        <div className="font-bold text-amber-300 font-mono flex items-center justify-between mb-2">
-                          <span className="flex items-center gap-1.5">
-                            <Gauge className="h-4 w-4" /> {msg.card.data.title}
-                          </span>
+                        <div className="font-bold text-amber-300 font-mono flex items-center gap-1.5 mb-2">
+                          <Gauge className="h-4 w-4" /> {msg.card.data.title}
                         </div>
                         <div className="flex items-center justify-between bg-black/50 p-2 rounded-lg mb-2 font-mono text-[10px]">
                           <span className="text-rose-400 font-bold">{msg.card.data.currentSpeed}</span>
@@ -698,11 +670,11 @@ export default function AIChatBubble({
                       </div>
                     )}
 
-                    {/* MINI-APP 5: Digital Dominance Scorecard Quiz */}
+                    {/* CARD 5: Quiz */}
                     {msg.card && msg.card.type === "dominance_quiz" && (
                       <div className="mt-3 rounded-xl border border-blue-500/40 bg-[#08122a] p-3 text-xs text-white">
                         <div className="font-bold text-cyan-light font-mono flex items-center gap-1.5 mb-2">
-                          <Award className="h-4 w-4" /> Digital Health Quiz
+                          <Award className="h-4 w-4" /> Digital Dominance Quiz
                         </div>
                         <div className="space-y-2 text-[10px]">
                           <p className="text-white/80">1. Does your website load in under 1 second on mobile 4G?</p>
@@ -710,43 +682,43 @@ export default function AIChatBubble({
                             <button
                               onClick={() => {
                                 soundManager.playClick();
-                                setQuizAnswers((p) => ({ ...p, 1: "No" }));
+                                setQuizAnswer("No");
                               }}
                               className={`px-3 py-1 rounded-lg border ${
-                                quizAnswers[1] === "No" ? "bg-rose-500/30 border-rose-500 text-rose-300" : "bg-white/5 border-white/10"
+                                quizAnswer === "No" ? "bg-rose-500/30 border-rose-500 text-rose-300" : "bg-white/5 border-white/10"
                               }`}
                             >
-                              No (Needs Speed Fix)
+                              No (Needs Upgrade)
                             </button>
                             <button
                               onClick={() => {
                                 soundManager.playClick();
-                                setQuizAnswers((p) => ({ ...p, 1: "Yes" }));
+                                setQuizAnswer("Yes");
                               }}
                               className={`px-3 py-1 rounded-lg border ${
-                                quizAnswers[1] === "Yes" ? "bg-emerald-500/30 border-emerald-500 text-emerald-300" : "bg-white/5 border-white/10"
+                                quizAnswer === "Yes" ? "bg-emerald-500/30 border-emerald-500 text-emerald-300" : "bg-white/5 border-white/10"
                               }`}
                             >
                               Yes
                             </button>
                           </div>
 
-                          {quizAnswers[1] && (
-                            <div className="mt-2 bg-black/40 p-2 rounded-lg text-emerald-400 font-mono font-bold text-[10px]">
-                              Score Diagnostic: 42/100 → Upgrade to ManickVerse 100/100 Architecture!
+                          {quizAnswer && (
+                            <div className="mt-2 bg-black/50 p-2 rounded-lg text-emerald-400 font-mono font-bold text-[10px]">
+                              Score: 38/100 → Upgrade to ManickVerse 100/100 Core Web Vitals Architecture!
                             </div>
                           )}
                         </div>
                       </div>
                     )}
 
-                    {/* MINI-APP 6: Booking Slot Card */}
+                    {/* CARD 6: Booking Slot */}
                     {msg.card && msg.card.type === "booking_slot" && (
                       <div className="mt-3 rounded-xl border border-purple-500/40 bg-purple-500/10 p-3 text-xs text-white">
                         <div className="font-bold text-purple-300 font-mono flex items-center gap-1.5 mb-2">
-                          <Calendar className="h-4 w-4" /> Available Technical Strategy Slots
+                          <Calendar className="h-4 w-4" /> Strategy Slots
                         </div>
-                        <div className="space-y-1.5 mb-2">
+                        <div className="space-y-1.5">
                           {msg.card.data.slots.map((s: string, i: number) => (
                             <button
                               key={i}
@@ -754,7 +726,7 @@ export default function AIChatBubble({
                               className="w-full text-left rounded-lg bg-white/10 p-2 text-[10px] sm:text-xs font-semibold text-white hover:bg-white/20 transition-colors flex items-center justify-between"
                             >
                               <span>👉 {s}</span>
-                              <span className="text-[9px] font-mono text-cyan-light">Confirm</span>
+                              <span className="text-[9px] font-mono text-cyan-light">Reserve</span>
                             </button>
                           ))}
                         </div>
@@ -766,7 +738,7 @@ export default function AIChatBubble({
                         href={msg.cta.href}
                         target={msg.cta.href.startsWith("http") ? "_blank" : "_self"}
                         rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-2 rounded-xl bg-cyan/20 border border-cyan/40 px-3.5 py-2 text-xs font-bold text-cyan-light hover:bg-cyan/30 transition-colors"
+                        className="mt-2.5 inline-flex items-center gap-1.5 rounded-xl bg-cyan/20 border border-cyan/40 px-3 py-1.5 text-[11px] font-bold text-cyan-light hover:bg-cyan/30 transition-colors"
                         onClick={() => {
                           soundManager.playClick();
                           if (msg.cta?.href.startsWith("#")) {
@@ -774,7 +746,7 @@ export default function AIChatBubble({
                           }
                         }}
                       >
-                        <Zap className="h-3.5 w-3.5" />
+                        <Zap className="h-3 w-3" />
                         {msg.cta.label}
                       </a>
                     )}
@@ -782,7 +754,7 @@ export default function AIChatBubble({
 
                   {/* Option pills */}
                   {msg.options && (
-                    <div className="mt-2 flex flex-wrap gap-1 max-w-[92%]">
+                    <div className="mt-1.5 flex flex-wrap gap-1 max-w-[92%]">
                       {msg.options.map((opt, i) => (
                         <button
                           key={i}
@@ -800,15 +772,15 @@ export default function AIChatBubble({
               {isTyping && (
                 <div className="flex items-center gap-2 text-cyan-light text-[11px] font-mono">
                   <Bot className="h-3.5 w-3.5 animate-bounce text-cyan-light" />
-                  <span>ManickVerse Neural Engine processing...</span>
+                  <span>AI Engine analyzing response...</span>
                 </div>
               )}
 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Form Footer */}
-            <div className="border-t border-white/10 bg-black/60 p-2.5 sm:p-3">
+            {/* Input Form */}
+            <div className="border-t border-white/10 bg-black/60 p-2.5 sm:p-3 shrink-0">
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -834,7 +806,7 @@ export default function AIChatBubble({
                   type="text"
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder={isListening ? "Listening..." : "Ask anything or describe your brand..."}
+                  placeholder={isListening ? "Listening..." : "Ask anything or type brand name..."}
                   className="w-full rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
                 />
 
@@ -852,7 +824,7 @@ export default function AIChatBubble({
         )}
       </AnimatePresence>
 
-      {/* Floating Trigger Button */}
+      {/* Floating Toggle Trigger Button */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.94 }}
@@ -861,7 +833,7 @@ export default function AIChatBubble({
           setIsOpen(!isOpen);
         }}
         className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full border border-cyan/40 bg-gradient-to-tr from-electric via-royal to-cyan text-white shadow-[0_10px_35px_rgba(59,130,246,0.5)] transition-all duration-300 hover:shadow-[0_15px_45px_rgba(34,211,238,0.7)]"
-        aria-label="Toggle AI Strategy Engine"
+        aria-label="Toggle AI Strategy Studio"
       >
         <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-cyan to-electric opacity-40 blur-md group-hover:opacity-80 transition-opacity" />
 

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Netlify Form Helper</title>
+</head>
+<body>
+  <!-- Static form definition so Netlify build crawler detects the form -->
+  <form name="contact" netlify netlify-honeypot="bot-field" action="/" method="POST" hidden>
+    <input type="text" name="form-name" value="contact" />
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="tel" name="phone" />
+    <input type="text" name="service" />
+    <input type="text" name="budget" />
+    <textarea name="message"></textarea>
+  </form>
+</body>
+</html>

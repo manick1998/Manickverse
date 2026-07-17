@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, Send, AlertCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Send, AlertCircle, MessageSquare } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
 const SERVICES = [
@@ -32,23 +32,46 @@ export default function ContactForm() {
 
     const form = e.currentTarget;
     const data = new FormData(form);
-    const payload = {
-      name: data.get("name"),
-      email: data.get("email"),
-      phone: data.get("phone"),
-      service: selectedService,
-      budget: selectedBudget,
-      message: data.get("message"),
-    };
+    const name = (data.get("name") as string) || "";
+    const email = (data.get("email") as string) || "";
+    const phone = (data.get("phone") as string) || "";
+    const customService = (data.get("service") as string) || "";
+    const message = (data.get("message") as string) || "";
+
+    const finalService = customService ? `${selectedService} (${customService})` : selectedService;
 
     try {
-      const res = await fetch("/api/leads", {
+      // 1. Submit natively to Netlify Forms for instant Netlify Dashboard + Email notification
+      const netlifyBody = new URLSearchParams();
+      netlifyBody.append("form-name", "contact");
+      netlifyBody.append("name", name);
+      netlifyBody.append("email", email);
+      netlifyBody.append("phone", phone);
+      netlifyBody.append("service", finalService);
+      netlifyBody.append("budget", selectedBudget);
+      netlifyBody.append("message", message);
+
+      const netlifyPromise = fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: netlifyBody.toString(),
+      }).catch(() => null);
+
+      // 2. Submit to internal API endpoint backup
+      const apiPromise = fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error || "Something went wrong.");
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          service: finalService,
+          budget: selectedBudget,
+          message,
+        }),
+      }).catch(() => null);
+
+      await Promise.all([netlifyPromise, apiPromise]);
 
       soundManager.playSuccess();
       setStatus("success");
@@ -88,17 +111,36 @@ export default function ContactForm() {
             Proposal Request Received!
           </h4>
           <p className="mt-2 text-xs sm:text-sm text-white/80 max-w-md mx-auto">
-            Thank you! Our founding strategy team will review your project requirements and reach out on WhatsApp / email within 24 hours.
+            Thank you! Your project request has been submitted. Our founding team will review your details and contact you via email / WhatsApp within 24 hours.
           </p>
-          <button
-            onClick={() => setStatus("idle")}
-            className="mt-6 rounded-full bg-white/10 px-6 py-2.5 text-xs font-bold text-white hover:bg-white/20"
-          >
-            Submit Another Project
-          </button>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href="https://wa.me/919361099051?text=Hi%20ManickVerse%2C%20I%20just%20submitted%20a%20project%20form%20on%20your%20website!"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-xs font-bold text-space-black shadow-md"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Direct WhatsApp Follow-up
+            </a>
+            <button
+              onClick={() => setStatus("idle")}
+              className="rounded-full bg-white/10 px-5 py-2.5 text-xs font-bold text-white hover:bg-white/20"
+            >
+              Submit Another Inquiry
+            </button>
+          </div>
         </motion.div>
       ) : (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 space-y-5"
+          name="contact"
+          data-netlify="true"
+        >
+          <input type="hidden" name="form-name" value="contact" />
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold text-white/80 mb-1.5">

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, Send, Sparkles, AlertCircle } from "lucide-react";
+import { CheckCircle2, Loader2, Send, AlertCircle } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
 const SERVICES = [
@@ -42,6 +42,7 @@ export default function ContactForm() {
     };
 
     try {
+      // Send to internal API route
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,7 +99,14 @@ export default function ContactForm() {
           </button>
         </motion.div>
       ) : (
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-6 space-y-5"
+          data-netlify="true"
+          name="manickverse-leads"
+        >
+          <input type="hidden" name="form-name" value="manickverse-leads" />
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-semibold text-white/80 mb-1.5">

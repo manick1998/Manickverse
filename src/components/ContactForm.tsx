@@ -41,7 +41,7 @@ export default function ContactForm() {
     const finalService = customService ? `${selectedService} (${customService})` : selectedService;
 
     try {
-      // 1. Submit natively to Netlify Forms for instant Netlify Dashboard + Email notification
+      // 1. Submit directly to Netlify static form endpoint /form.html
       const netlifyBody = new URLSearchParams();
       netlifyBody.append("form-name", "contact");
       netlifyBody.append("name", name);
@@ -51,13 +51,13 @@ export default function ContactForm() {
       netlifyBody.append("budget", selectedBudget);
       netlifyBody.append("message", message);
 
-      const netlifyPromise = fetch("/", {
+      const netlifyPromise = fetch("/form.html", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: netlifyBody.toString(),
       }).catch(() => null);
 
-      // 2. Submit to internal API endpoint backup
+      // 2. Submit to internal API backup
       const apiPromise = fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -134,6 +134,8 @@ export default function ContactForm() {
         </motion.div>
       ) : (
         <form
+          action="/form.html"
+          method="POST"
           onSubmit={handleSubmit}
           className="mt-6 space-y-5"
           name="contact"

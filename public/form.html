@@ -2,12 +2,58 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Netlify Form Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submission Received — ManickVerse</title>
+  <style>
+    body {
+      background-color: #050611;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 40px;
+      border-radius: 24px;
+      max-width: 480px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 12px;
+      background: linear-gradient(115deg, #ffffff, #60a5fa, #22d3ee);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    a {
+      display: inline-block;
+      margin-top: 24px;
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 9999px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <!-- Static form definition so Netlify build crawler detects the form -->
-  <form name="contact" netlify netlify-honeypot="bot-field" action="/" method="POST" hidden>
-    <input type="text" name="form-name" value="contact" />
+  <!-- Netlify Form Crawler HTML declaration -->
+  <form name="contact" netlify netlify-honeypot="bot-field" action="/form.html" method="POST" hidden>
+    <input type="hidden" name="form-name" value="contact" />
     <input type="text" name="name" />
     <input type="email" name="email" />
     <input type="tel" name="phone" />
@@ -15,5 +61,12 @@
     <input type="text" name="budget" />
     <textarea name="message"></textarea>
   </form>
+
+  <div class="card">
+    <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
+    <h1>Proposal Request Submitted!</h1>
+    <p>Thank you for reaching out to ManickVerse. Your lead details have been logged and our founding team will contact you within 24 hours.</p>
+    <a href="/">← Return to ManickVerse Home</a>
+  </div>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, Send, AlertCircle, MessageSquare } from "lucide-react";
+import { CheckCircle2, Loader2, Send, AlertCircle, MessageSquare, DollarSign, IndianRupee } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
 const SERVICES = [
@@ -14,15 +14,18 @@ const SERVICES = [
   "Custom Web Application / SaaS",
 ];
 
-const BUDGETS = ["$1,000 - $3,000", "$3,000 - $5,000", "$5,000 - $10,000", "$10,000+"];
+const BUDGETS_USD = ["$1,000 - $3,000", "$3,000 - $5,000", "$5,000 - $10,000", "$10,000+"];
+const BUDGETS_INR = ["₹25,000 - ₹50,000", "₹50,000 - ₹1,00,000", "₹1,00,000 - ₹2,50,000", "₹2,50,000+"];
 
 type Status = "idle" | "loading" | "success" | "error";
 
 export default function ContactForm() {
+  const [currency, setCurrency] = useState<"INR" | "USD">("INR");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [selectedService, setSelectedService] = useState(SERVICES[1]);
-  const [selectedBudget, setSelectedBudget] = useState(BUDGETS[1]);
+  const activeBudgets = currency === "INR" ? BUDGETS_INR : BUDGETS_USD;
+  const [selectedBudget, setSelectedBudget] = useState(activeBudgets[1]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -83,10 +86,10 @@ export default function ContactForm() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-[#080d24]/90 p-6 sm:p-10 shadow-[0_25px_80px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+    <div className="relative overflow-hidden rounded-3xl border border-white/20 bg-[#080d24]/90 p-5 sm:p-10 shadow-[0_25px_80px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
       <div className="flex items-center gap-2 mb-4">
         <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-ping" />
-        <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-light">
+        <span className="text-[11px] sm:text-xs font-mono font-bold uppercase tracking-widest text-cyan-light">
           2-Week Build Slot Openings Active
         </span>
       </div>
@@ -94,7 +97,7 @@ export default function ContactForm() {
       <h3 className="font-display text-2xl sm:text-3xl font-extrabold text-white">
         Start Your Project Sprint
       </h3>
-      <p className="mt-2 text-xs sm:text-sm text-white/70">
+      <p className="mt-1.5 text-xs sm:text-sm text-white/70">
         Fill out your project details to receive a free strategy proposal within 24 hours.
       </p>
 
@@ -102,7 +105,7 @@ export default function ContactForm() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="my-8 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-8 text-center"
+          className="my-8 rounded-2xl border border-emerald-500/40 bg-emerald-500/10 p-6 sm:p-8 text-center"
         >
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 mb-4">
             <CheckCircle2 className="h-8 w-8" />
@@ -137,7 +140,7 @@ export default function ContactForm() {
           action="/form.html"
           method="POST"
           onSubmit={handleSubmit}
-          className="mt-6 space-y-5"
+          className="mt-6 space-y-4 sm:space-y-5"
           name="contact"
           data-netlify="true"
         >
@@ -153,7 +156,7 @@ export default function ContactForm() {
                 name="name"
                 required
                 placeholder="e.g. Manickam R"
-                className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
               />
             </div>
 
@@ -166,7 +169,7 @@ export default function ContactForm() {
                 name="email"
                 required
                 placeholder="e.g. founder@company.com"
-                className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
               />
             </div>
           </div>
@@ -180,7 +183,7 @@ export default function ContactForm() {
                 type="tel"
                 name="phone"
                 placeholder="e.g. +91 9361099051"
-                className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
               />
             </div>
 
@@ -192,7 +195,7 @@ export default function ContactForm() {
                 type="text"
                 name="service"
                 placeholder="e.g. E-Commerce Redesign"
-                className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
+                className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all"
               />
             </div>
           </div>
@@ -202,7 +205,7 @@ export default function ContactForm() {
             <label className="block text-xs font-semibold text-white/80 mb-2">
               Select Desired Service Scope
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {SERVICES.map((s) => (
                 <button
                   key={s}
@@ -211,7 +214,7 @@ export default function ContactForm() {
                     soundManager.playClick();
                     setSelectedService(s);
                   }}
-                  className={`rounded-xl px-3 py-2 text-[11px] font-semibold transition-all ${
+                  className={`rounded-xl px-2.5 py-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-[11px] font-semibold transition-all ${
                     selectedService === s
                       ? "border border-cyan-light bg-cyan/20 text-cyan-light shadow-sm"
                       : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
@@ -223,13 +226,48 @@ export default function ContactForm() {
             </div>
           </div>
 
-          {/* Budget Selector Pills */}
+          {/* Budget Selector with INR ₹ and USD $ Currency Toggle */}
           <div>
-            <label className="block text-xs font-semibold text-white/80 mb-2">
-              Target Project Budget
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {BUDGETS.map((b) => (
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-white/80">
+                Target Project Budget
+              </label>
+              <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-0.5 text-[10px] font-bold font-mono">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.playClick();
+                    setCurrency("INR");
+                    setSelectedBudget(BUDGETS_INR[1]);
+                  }}
+                  className={`rounded-full px-2.5 py-0.5 transition-all ${
+                    currency === "INR"
+                      ? "bg-gradient-to-r from-electric to-royal text-white shadow"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  INR (₹)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundManager.playClick();
+                    setCurrency("USD");
+                    setSelectedBudget(BUDGETS_USD[1]);
+                  }}
+                  className={`rounded-full px-2.5 py-0.5 transition-all ${
+                    currency === "USD"
+                      ? "bg-gradient-to-r from-electric to-royal text-white shadow"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  USD ($)
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
+              {activeBudgets.map((b) => (
                 <button
                   key={b}
                   type="button"
@@ -237,7 +275,7 @@ export default function ContactForm() {
                     soundManager.playClick();
                     setSelectedBudget(b);
                   }}
-                  className={`rounded-xl py-2 text-[11px] font-mono font-semibold transition-all ${
+                  className={`rounded-xl py-2 text-[10px] sm:text-[11px] font-mono font-semibold transition-all ${
                     selectedBudget === b
                       ? "border border-cyan-light bg-cyan/20 text-cyan-light shadow-sm"
                       : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
@@ -257,7 +295,7 @@ export default function ContactForm() {
               name="message"
               rows={3}
               placeholder="Describe your goals, current site problems, or target launch deadline..."
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all resize-none"
+              className="w-full rounded-xl border border-white/15 bg-white/5 px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs text-white placeholder-white/40 outline-none focus:border-cyan-light transition-all resize-none"
             />
           </div>
 
@@ -271,16 +309,16 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-electric via-royal to-cyan py-4 text-xs font-extrabold text-white shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-electric via-royal to-cyan py-3.5 sm:py-4 text-xs font-extrabold text-white shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all hover:scale-[1.01] active:scale-95 disabled:opacity-50"
           >
             {status === "loading" ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Submitting Project Sprint Request...</span>
+                <span>Submitting Project Request...</span>
               </>
             ) : (
               <>
-                <span>Request Free Proposal & Scope</span>
+                <span>Request Free Proposal ({currency === "INR" ? "₹ INR" : "$ USD"})</span>
                 <Send className="h-4 w-4" />
               </>
             )}

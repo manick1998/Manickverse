@@ -12,6 +12,10 @@ import {
   Gauge,
   CheckCircle,
   ChevronRight,
+  Code2,
+  Layers,
+  Award,
+  TrendingUp,
 } from "lucide-react";
 import { Reveal, useParallaxTilt } from "@/lib/motion";
 import { soundManager } from "@/lib/audio";
@@ -23,22 +27,22 @@ const SHOWCASE_TABS = [
     badge: "Lumen Apparel",
     headline: "Ultra-Fast Luxury Fashion Storefront",
     metrics: "2.8x Conversion Surge • 0.6s LCP",
-    color: "from-cyan-500/20 to-blue-600/20",
+    color: "from-cyan-500/20 via-blue-600/15 to-transparent",
     mockup: {
       nav: ["New Arrivals", "Collections", "Cart (2)"],
       heroTitle: "Elegance Engineered For Movement",
-      subTitle: "Modern apparel tailored with precision fabrics and zero-friction checkout.",
+      subTitle: "Modern apparel tailored with precision fabrics and zero-friction express checkout.",
       price: "$189.00",
       cta: "Instant Express Checkout",
     },
   },
   {
     id: "saas",
-    title: "SaaS & Tech",
-    badge: "Aura AI Analytics",
+    title: "SaaS & AI Tech",
+    badge: "Aura Analytics",
     headline: "Conversion-Engineered SaaS Landing Page",
     metrics: "+142% Signup Rate • 99 Lighthouse",
-    color: "from-purple-500/20 to-indigo-600/20",
+    color: "from-purple-500/20 via-indigo-600/15 to-transparent",
     mockup: {
       nav: ["Product", "Solutions", "Pricing"],
       heroTitle: "Intelligent Workflows for High-Growth Teams",
@@ -49,11 +53,11 @@ const SHOWCASE_TABS = [
   },
   {
     id: "realestate",
-    title: "Real Estate",
+    title: "Luxury Real Estate",
     badge: "Meridian Estates",
-    headline: "High-End Luxury Property Showcase",
+    headline: "High-End Architectural Property Showcase",
     metrics: "3.4x Inquiries • Custom 3D Tours",
-    color: "from-emerald-500/20 to-teal-600/20",
+    color: "from-emerald-500/20 via-teal-600/15 to-transparent",
     mockup: {
       nav: ["Penthouses", "Villas", "Virtual Tour"],
       heroTitle: "The Pinnacle of Oceanfront Living",
@@ -64,11 +68,11 @@ const SHOWCASE_TABS = [
   },
   {
     id: "medical",
-    title: "Healthcare",
+    title: "Healthcare Portal",
     badge: "Wellpoint Clinic",
     headline: "Trust-Building Medical Portal",
-    metrics: "+210% Online Bookings • HIPAA Compliant",
-    color: "from-blue-500/20 to-cyan-600/20",
+    metrics: "+210% Online Bookings • HIPAA Aligned",
+    color: "from-blue-500/20 via-indigo-600/15 to-transparent",
     mockup: {
       nav: ["Specialties", "Doctors", "Book Now"],
       heroTitle: "Compassionate, World-Class Medical Care",
@@ -86,47 +90,54 @@ export default function Hero() {
   const activeShowcase = SHOWCASE_TABS.find((t) => t.id === activeTab) || SHOWCASE_TABS[0];
 
   return (
-    <section className="relative min-h-[90vh] pt-24 pb-20 sm:pt-32 sm:pb-24 overflow-hidden flex flex-col justify-center">
-      {/* Aurora Background Mesh & Glows */}
-      <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))]" />
-      <div className="pointer-events-none absolute top-1/4 left-1/2 -z-10 h-[350px] w-[90vw] max-w-[950px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-electric/20 via-royal/25 to-cyan/20 blur-[120px] animate-pulse" />
+    <section className="relative min-h-[92vh] pt-24 pb-20 sm:pt-36 sm:pb-28 overflow-hidden flex flex-col justify-center">
+      {/* Dynamic Aurora Ambient Background Mesh */}
+      <div className="pointer-events-none absolute inset-0 -z-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.28),rgba(255,255,255,0))]" />
+      <div className="pointer-events-none absolute top-1/4 left-1/2 -z-10 h-[380px] w-[92vw] max-w-[1000px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-electric/25 via-royal/30 to-cyan/25 blur-[140px] animate-pulse" />
       <div className="pointer-events-none absolute inset-0 -z-10 grid-bg opacity-30" />
 
+      {/* Subtle Floating Light Rays */}
+      <div className="pointer-events-none absolute -top-40 right-10 -z-10 h-[500px] w-[500px] rounded-full bg-cyan-light/10 blur-[150px]" />
+
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-        {/* Top Announcement Badge - Fully Responsive Text */}
+        {/* Core Promise Announcement Badge */}
         <div className="flex justify-center w-full">
           <Reveal>
-            <div className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs font-semibold backdrop-blur-xl shadow-lg text-center">
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              className="inline-flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-2.5 rounded-full border border-cyan/40 bg-white/5 px-4 py-2 text-[10px] sm:text-xs font-semibold backdrop-blur-xl shadow-[0_0_30px_rgba(34,211,238,0.25)] text-center cursor-pointer"
+            >
               <span className="flex h-2 w-2 rounded-full bg-cyan-light animate-ping shrink-0" />
               <span className="text-cyan-light font-bold">CORE PROMISE:</span>
-              <span className="text-white/90">🚀 Website Delivered Within 2 Weeks</span>
-            </div>
+              <span className="text-white/95">🚀 Website Delivered Within 2 Weeks</span>
+              <ChevronRight className="h-3.5 w-3.5 text-white/40" />
+            </motion.div>
           </Reveal>
         </div>
 
-        {/* Hero Title & Copy - Fluid Clamp Typography */}
+        {/* Hero Title & Oversized Typography */}
         <div className="mt-6 sm:mt-8 text-center max-w-4xl mx-auto w-full">
           <Reveal>
-            <h1 className="font-display text-[clamp(1.65rem,7vw,4.8rem)] font-extrabold tracking-tight leading-[1.08] text-white break-words">
+            <h1 className="font-display text-[clamp(1.75rem,7.5vw,4.8rem)] font-extrabold tracking-tight leading-[1.06] text-white break-words">
               Crafting Extraordinary{" "}
-              <span className="text-gradient block sm:inline drop-shadow-[0_10px_35px_rgba(59,130,246,0.3)]">
+              <span className="text-gradient block sm:inline drop-shadow-[0_10px_40px_rgba(59,130,246,0.35)]">
                 Digital Experiences
               </span>
             </h1>
           </Reveal>
 
           <Reveal delay={0.1}>
-            <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-white/70 max-w-2xl mx-auto font-normal leading-relaxed px-2">
+            <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-white/75 max-w-2xl mx-auto font-normal leading-relaxed px-2">
               We build high-converting, award-worthy Next.js websites for businesses that refuse to look ordinary. Live in as little as 14 days.
             </p>
           </Reveal>
 
-          {/* Action CTAs */}
+          {/* Action Call-to-Actions */}
           <Reveal delay={0.2} className="mt-7 sm:mt-9 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
             <a
               href="#contact"
               onClick={() => soundManager.playClick()}
-              className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-full bg-gradient-to-r from-electric via-royal to-cyan px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-extrabold text-white shadow-[0_0_40px_rgba(59,130,246,0.5)] transition-all duration-300 hover:scale-105 active:scale-95"
+              className="group relative flex w-full sm:w-auto items-center justify-center gap-3 rounded-full bg-gradient-to-r from-electric via-royal to-cyan px-7 sm:px-9 py-3.5 sm:py-4 text-xs sm:text-sm font-extrabold text-white shadow-[0_0_45px_rgba(59,130,246,0.55)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(34,211,238,0.7)] active:scale-95"
             >
               <span>Start Your Project Today</span>
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -135,14 +146,14 @@ export default function Hero() {
             <a
               href="#work"
               onClick={() => soundManager.playHover()}
-              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 sm:px-7 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/30"
+              className="flex w-full sm:w-auto items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 sm:px-8 py-3.5 sm:py-4 text-xs sm:text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/10 hover:border-white/30"
             >
               <Sparkles className="h-4 w-4 text-cyan-light" />
               <span>Explore Selected Work</span>
             </a>
           </Reveal>
 
-          {/* Social Proof metrics - Mobile Responsive Stack */}
+          {/* Social Proof Badges & Rating */}
           <Reveal delay={0.25} className="mt-7 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6 text-[11px] sm:text-xs text-white/60 font-medium">
             <div className="flex items-center gap-1 text-amber-400">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -153,12 +164,12 @@ export default function Hero() {
             <span className="hidden sm:inline text-white/20">•</span>
             <div className="flex items-center gap-1.5">
               <ShieldCheck className="h-3.5 w-3.5 text-cyan-light" />
-              <span>150+ Websites Launched</span>
+              <span>150+ Websites Delivered</span>
             </div>
             <span className="hidden sm:inline text-white/20">•</span>
             <div className="flex items-center gap-1.5">
               <Gauge className="h-3.5 w-3.5 text-emerald-400" />
-              <span>100/100 Core Web Vitals Guarantee</span>
+              <span>100/100 Core Web Vitals Standard</span>
             </div>
           </Reveal>
         </div>
@@ -170,7 +181,7 @@ export default function Hero() {
             onMouseMove={onMouseMove}
             onMouseLeave={onMouseLeave}
           >
-            {/* Template Selector Tabs */}
+            {/* Industry Template Selector Tabs */}
             <div className="mb-4 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
               {SHOWCASE_TABS.map((tab) => (
                 <button
@@ -191,7 +202,7 @@ export default function Hero() {
               ))}
             </div>
 
-            {/* 3D Browser Container */}
+            {/* 3D Perspective Browser Container */}
             <motion.div
               style={{ rotateX, rotateY }}
               transition={{ type: "spring", stiffness: 100, damping: 15 }}
@@ -214,9 +225,9 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Dynamic Live Mockup Canvas */}
+              {/* Dynamic Live Canvas Preview */}
               <div className={`p-4 sm:p-10 bg-gradient-to-br ${activeShowcase.color} min-h-[300px] sm:min-h-[380px] flex flex-col justify-between transition-all duration-500`}>
-                {/* Mockup Top Nav */}
+                {/* Mockup Top Header */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-3 sm:pb-4">
                   <div className="font-display font-extrabold text-sm sm:text-lg text-white tracking-tight flex items-center gap-1.5">
                     <div className="h-2 w-2 rounded-full bg-cyan-light animate-ping" />
@@ -232,10 +243,10 @@ export default function Hero() {
                   </button>
                 </div>
 
-                {/* Mockup Main Hero Body */}
+                {/* Mockup Main Hero */}
                 <div className="my-4 sm:my-8 max-w-2xl">
                   <span className="inline-block rounded-full bg-cyan/20 border border-cyan/40 px-2.5 py-0.5 text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-cyan-light mb-2">
-                    Award-Winning Live Preview
+                    Award-Winning Live Digital Preview
                   </span>
                   <h2 className="font-display text-lg sm:text-3xl font-extrabold text-white leading-tight">
                     {activeShowcase.mockup.heroTitle}
@@ -251,7 +262,7 @@ export default function Hero() {
                   </div>
                 </div>
 
-                {/* Mockup Footer Metric Bar */}
+                {/* Footer Metrics */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-3 border-t border-white/10 text-center">
                   <div className="bg-white/5 rounded-xl p-2 border border-white/10">
                     <div className="text-[9px] sm:text-xs text-white/50">Delivery Speed</div>

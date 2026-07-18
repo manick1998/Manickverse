@@ -17,11 +17,9 @@ import CTA from "@/components/CTA";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
 import CommandPalette from "@/components/CommandPalette";
-import AIChatBubble from "@/components/AIChatBubble";
 
 export default function HomePage() {
   const [commandOpen, setCommandOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
   const [currentTheme, setCurrentTheme] = useState("Cosmic Dark");
 
   const handleToggleTheme = () => {
@@ -32,10 +30,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Navbar
-        onOpenCommand={() => setCommandOpen(true)}
-        onOpenAI={() => setAiOpen(true)}
-      />
+      <Navbar onOpenCommand={() => setCommandOpen(true)} />
 
       <main id="main-content" className="relative">
         <Hero />
@@ -55,18 +50,13 @@ export default function HomePage() {
       <Footer />
       <FloatingButtons />
 
-      {/* Global Modals & Overlay Widgets */}
+      {/* Global Command Palette (Ctrl + K / Cmd + K) */}
       <CommandPalette
         isOpen={commandOpen}
         onClose={() => setCommandOpen(false)}
-        onOpenAI={() => setAiOpen(true)}
+        onOpenAI={() => {}}
         onToggleTheme={handleToggleTheme}
         currentTheme={currentTheme}
-      />
-
-      <AIChatBubble
-        isOpen={aiOpen}
-        setIsOpen={setAiOpen}
       />
     </>
   );

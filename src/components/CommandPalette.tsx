@@ -8,7 +8,6 @@ import {
   Compass,
   Briefcase,
   Layers,
-  Sparkles,
   Calculator,
   MessageSquare,
   Volume2,
@@ -33,13 +32,12 @@ interface CommandItem {
 export default function CommandPalette({
   isOpen,
   onClose,
-  onOpenAI,
   onToggleTheme,
   currentTheme,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  onOpenAI: () => void;
+  onOpenAI?: () => void;
   onToggleTheme?: () => void;
   currentTheme?: string;
 }) {
@@ -121,17 +119,6 @@ export default function CommandPalette({
       action: () => {
         document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
         onClose();
-      },
-    },
-    {
-      id: "action-ai",
-      category: "Actions",
-      title: "Ask AI Assistant Concierge",
-      subtitle: "Get instant answers, project estimates, or design advice",
-      icon: Sparkles,
-      action: () => {
-        onClose();
-        onOpenAI();
       },
     },
     {
@@ -224,7 +211,7 @@ export default function CommandPalette({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md"
+            className="fixed inset-0 bg-black/75 backdrop-blur-md"
           />
 
           {/* Dialog Container */}
@@ -233,7 +220,7 @@ export default function CommandPalette({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-white/15 bg-[#080c1e]/90 shadow-[0_25px_80px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+            className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-white/15 bg-[#080c1e]/95 shadow-[0_25px_80px_rgba(0,0,0,0.85)] backdrop-blur-xl"
             onKeyDown={handleKeyDown}
           >
             {/* Top Search Header */}
@@ -244,7 +231,7 @@ export default function CommandPalette({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a command, section, or question... (e.g. Services, Pricing, Sound)"
+                placeholder="Type a command or section... (e.g. Services, Pricing, Sound, Contact)"
                 className="w-full bg-transparent text-sm text-white placeholder-white/40 outline-none"
               />
               <button
@@ -260,7 +247,7 @@ export default function CommandPalette({
             <div className="max-h-[360px] overflow-y-auto p-2 scrollbar-none">
               {filteredItems.length === 0 ? (
                 <div className="py-12 text-center text-sm text-white/50">
-                  No matching commands found. Try searching for &quot;Services&quot;, &quot;Pricing&quot;, or &quot;AI&quot;.
+                  No matching commands found. Try searching for &quot;Services&quot;, &quot;Pricing&quot;, or &quot;Work&quot;.
                 </div>
               ) : (
                 filteredItems.map((item, idx) => {

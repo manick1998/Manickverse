@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle2, Loader2, Send, AlertCircle, MessageSquare, DollarSign, IndianRupee } from "lucide-react";
+import { CheckCircle2, Loader2, Send, AlertCircle, MessageSquare } from "lucide-react";
 import { soundManager } from "@/lib/audio";
 
 const SERVICES = [
@@ -14,18 +14,12 @@ const SERVICES = [
   "Custom Web Application / SaaS",
 ];
 
-const BUDGETS_USD = ["$1,000 - $3,000", "$3,000 - $5,000", "$5,000 - $10,000", "$10,000+"];
-const BUDGETS_INR = ["₹25,000 - ₹50,000", "₹50,000 - ₹1,00,000", "₹1,00,000 - ₹2,50,000", "₹2,50,000+"];
-
 type Status = "idle" | "loading" | "success" | "error";
 
 export default function ContactForm() {
-  const [currency, setCurrency] = useState<"INR" | "USD">("INR");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [selectedService, setSelectedService] = useState(SERVICES[1]);
-  const activeBudgets = currency === "INR" ? BUDGETS_INR : BUDGETS_USD;
-  const [selectedBudget, setSelectedBudget] = useState(activeBudgets[1]);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -51,7 +45,6 @@ export default function ContactForm() {
       netlifyBody.append("email", email);
       netlifyBody.append("phone", phone);
       netlifyBody.append("service", finalService);
-      netlifyBody.append("budget", selectedBudget);
       netlifyBody.append("message", message);
 
       const netlifyPromise = fetch("/form.html", {
@@ -69,7 +62,6 @@ export default function ContactForm() {
           email,
           phone,
           service: finalService,
-          budget: selectedBudget,
           message,
         }),
       }).catch(() => null);
@@ -226,67 +218,6 @@ export default function ContactForm() {
             </div>
           </div>
 
-          {/* Budget Selector with INR ₹ and USD $ Currency Toggle */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-white/80">
-                Target Project Budget
-              </label>
-              <div className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 p-0.5 text-[10px] font-bold font-mono">
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playClick();
-                    setCurrency("INR");
-                    setSelectedBudget(BUDGETS_INR[1]);
-                  }}
-                  className={`rounded-full px-2.5 py-0.5 transition-all ${
-                    currency === "INR"
-                      ? "bg-gradient-to-r from-electric to-royal text-white shadow"
-                      : "text-white/50 hover:text-white"
-                  }`}
-                >
-                  INR (₹)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    soundManager.playClick();
-                    setCurrency("USD");
-                    setSelectedBudget(BUDGETS_USD[1]);
-                  }}
-                  className={`rounded-full px-2.5 py-0.5 transition-all ${
-                    currency === "USD"
-                      ? "bg-gradient-to-r from-electric to-royal text-white shadow"
-                      : "text-white/50 hover:text-white"
-                  }`}
-                >
-                  USD ($)
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
-              {activeBudgets.map((b) => (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => {
-                    soundManager.playClick();
-                    setSelectedBudget(b);
-                  }}
-                  className={`rounded-xl py-2 text-[10px] sm:text-[11px] font-mono font-semibold transition-all ${
-                    selectedBudget === b
-                      ? "border border-cyan-light bg-cyan/20 text-cyan-light shadow-sm"
-                      : "border border-white/10 bg-white/5 text-white/60 hover:bg-white/10"
-                  }`}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div>
             <label className="block text-xs font-semibold text-white/80 mb-1.5">
               Tell us about your project or existing website link
@@ -318,7 +249,7 @@ export default function ContactForm() {
               </>
             ) : (
               <>
-                <span>Request Free Proposal ({currency === "INR" ? "₹ INR" : "$ USD"})</span>
+                <span>Request Free Proposal & Scope</span>
                 <Send className="h-4 w-4" />
               </>
             )}
